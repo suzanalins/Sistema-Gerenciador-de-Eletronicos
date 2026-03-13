@@ -1,0 +1,54 @@
+CREATE DATABASE provaSAEP;
+
+USE provaSAEP;
+
+CREATE TABLE Usuario(
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Nome VARCHAR(100),
+Email VARCHAR (100),
+Telefone VARCHAR (20),
+Senha VARCHAR(10)
+);
+
+CREATE TABLE Usuarios(
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Usuario_ID INT,
+FOREIGN KEY (Usuario_ID) REFERENCES Usuario(ID)
+);
+
+CREATE TABLE Imagens(
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Imagem BLOB
+);
+
+CREATE TABLE Produto_Choices(
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Categoria VARCHAR (15)
+);
+
+CREATE TABLE Produto(
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Nome_Produto VARCHAR(100),
+Descricao TEXT,
+Valor FLOAT,
+Imagens_ID INT,
+Categoria_ID INT,
+FOREIGN KEY (Imagens_ID) REFERENCES Imagens(ID),
+FOREIGN KEY (Categoria_ID) REFERENCES Produto_Choices(ID)
+);
+
+CREATE TABLE Produtos(
+ID INT PRIMARY KEY auto_increment,
+Produto_ID INT,
+FOREIGN KEY (Produto_ID) REFERENCES Produto(ID)
+);
+
+CREATE TABLE Avaliacao(
+ID INT PRIMARY KEY AUTO_INCREMENT,
+Comentario TEXT,
+Nota INT,
+Data_Avaliacao DATE,
+Produto_ID INT,
+Usuario_ID INT,
+FOREIGN KEY (Produto_ID) REFERENCES Produto(ID)
+)
