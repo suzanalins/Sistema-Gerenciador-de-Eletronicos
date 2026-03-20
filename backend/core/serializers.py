@@ -1,18 +1,75 @@
 from rest_framework import serializers
 from .models import Usuario, Categoria, Produto, Movimentacao
+from django.contrib.auth.models import User
+
+
+##SERIALIZERS
 
 
 #tabela de usuários
 class UsuarioSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source ='user.username', read_only = True)
+    email = serializers.CharField(source ='user.email', read_only = True)
+
     class Meta:
         model = Usuario
-        fields = ['id', 'nome', 'email', 'senha', 'tipo_usuario']
-        extra_kwargs = {
-            'senha': {'write_only': True}
-        }
+        fields = ['id', 'nome', 'username', 'email']
+
+
+
+class RegisterSerializer(serializers.Serializer):
+    # Tabela auth_user
+    username =  serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    # Tabela api_usuario 
+    nome = serializers.CharField(required=False, allow_blank=True, default='')
+   
+
 
     def create(self, validated_data):
-        return Usuario.objects.create(**validated_data)
+        # Criando na Tabela api_usuario 
+        nome = validated_data.get('nome', '')
+        email = validated_data['email']
+        senha= validated_data.get('senha', '')
+
+
+        # Criando na Tabela auth_user 
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+  
+        user.is_active = True
+     
+        Usuario.objects.create(
+            user = user,
+            nome = nome if nome else user.username
+        )
+
+        return user
+
+
+
+#usuario me serializer
+class UsuarioMeSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.CharField(source='user.email', read_only=True)
+    is_active = serializers.BooleanField(source='user.is_active', read_only=True)
+
+    class Meta:
+        model = Usuario
+        fields = ['id', 'nome', 'email', 'username', 'is_active']
+
+
+
+
+
+
+
+
+
 
 #tabela de categorias
 class CategoriaSerializer(serializers.ModelSerializer):

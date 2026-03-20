@@ -1,17 +1,11 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 #criando a tabela de usuários
 class Usuario(models.Model):
-    TIPO_USUARIO = [
-        ('administrador', 'Administrador'),
-        ('operador', 'Operador'),
-    ]
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # email = models.CharField(max_length=100)
     nome = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    senha = models.CharField(max_length=255)
-    tipo_usuario = models.CharField(max_length=20, choices=TIPO_USUARIO)
 
     def __str__(self):
         return self.nome
@@ -35,8 +29,8 @@ class Produto(models.Model):
     resolucao_tela = models.CharField(max_length=50, blank=True, null=True)
     conectividade = models.CharField(max_length=50, blank=True, null=True)
 
-    estoque_atual = models.IntegerField()
-    estoque_minimo = models.IntegerField()
+    estoque_atual = models.PositiveIntegerField()#deixa pedindo um valor positivo
+    estoque_minimo = models.PositiveIntegerField()
 
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
 
@@ -55,8 +49,8 @@ class Movimentacao(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
 
     tipo_movimentacao = models.CharField(max_length=10, choices=TIPO_MOVIMENTACAO)
-    quantidade = models.IntegerField()
-    data_movimentacao = models.DateField()
+    quantidade = models.PositiveIntegerField()
+    data_movimentacao = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.produto.nome} - {self.tipo_movimentacao}"

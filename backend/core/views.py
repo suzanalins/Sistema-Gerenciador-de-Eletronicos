@@ -1,21 +1,17 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import api_view, APIView
-from .filters import ProdutoFilter, UsuarioFilter, MovimentacaoFilter
+from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework.generics import RetrieveAPIView
+from .filters import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Produto
-from .serializers import ProdutoSerializer
-from .models import Usuario, Categoria, Produto, Movimentacao
-from .serializers import (
-    UsuarioSerializer,
-    CategoriaSerializer,
-    ProdutoSerializer,
-    MovimentacaoSerializer
-)
+from .models import*
+from .serializers import *
 
 
+###VIEWS
 
 
 #usuário
@@ -24,6 +20,10 @@ class UsuarioViewSet(ModelViewSet):
     serializer_class = UsuarioSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Usuario.objects.filter(user=self.request.user)
+    
+    
 
 
 class RegisterView(APIView):
@@ -35,39 +35,22 @@ class RegisterView(APIView):
         serializer.save()
 
         return Response({"Usuário criado com sucesso."}, status=status.HTTP_201_CREATED)
+    
 
 
+class MeView(RetrieveAPIView):
+    serializer_class = UsuarioMeSerializer
+    permission_classes = [IsAuthenticated]
 
-# LOGIN
-@api_view(['POST'])
-def login(request):
-    email = request.data.get('email')
-    senha = request.data.get('senha')
-
-    if not email or not senha:
-        return Response(
-            {'erro': 'Email e senha são obrigatórios'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    try:
-        usuario = Usuario.objects.get(email=email, senha=senha)
-
-        return Response({
-            'mensagem': 'Login realizado com sucesso',
-            'usuario': {
-                'id': usuario.id,
-                'nome': usuario.nome,
-                'email': usuario.email,
-                'tipo_usuario': usuario.tipo_usuario
+    def get_object(self):
+        perfil, created = Usuario.objects.get_or_create(
+            user=self.request.user,
+            defaults={
+                'nome': self.request.user.username,
             }
-        }, status=status.HTTP_200_OK)
-
-    except Usuario.DoesNotExist:
-        return Response(
-            {'erro': 'Email ou senha inválidos'},
-            status=status.HTTP_400_BAD_REQUEST
         )
+        return perfil
+
 
 
 #categoria
@@ -111,7 +94,7 @@ class MovimentacaoViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        produto = serializer.validated_data['produto']
+        produto = serializer.instance.produto
         response_data = serializer.data
 
         #ALERTA DE ESTOQUE

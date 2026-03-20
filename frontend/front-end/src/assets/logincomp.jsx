@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 
 
-export default function Login(){
+export default function Logincomp(){
     const [nome, setNome] = useState ("")
     const [senha, setSenha] = useState("")
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
 
 
 const logar = async (e) => {
@@ -32,7 +31,7 @@ const logar = async (e) => {
         headers: { Authorization: `Bearer ${access}` },
       });
       
-      const { is_superuser, is_staff, is_active } = me.data;
+      const {is_active } = me.data;
 
       
       // 3) Se usuário estiver inativo, bloqueia
@@ -43,12 +42,6 @@ const logar = async (e) => {
         return;
       }
 
-      // 4) Redirecionamento por perfil
-      if (is_staff) {
-        navigate("/admin/home");
-      } else {
-        navigate("/operador/home");
-      }
     } catch (error) {
       console.log("Error: ", error);
       localStorage.removeItem("token");
@@ -59,7 +52,7 @@ const logar = async (e) => {
   };
 
     return(
-        <div className="loginPage">
+      <div className="loginPage">
       <div className="loginCard">
         <div className="loginHeader">
           <h1 className="loginTitle">Acessar sistema</h1>
@@ -72,7 +65,7 @@ const logar = async (e) => {
             <input
               className="input"
               value={nome}
-              onChange={(e) => setUser(e.target.value)}
+              onChange={(e) => setNome(e.target.value)}
               placeholder="Digite seu usuário"
               autoComplete="username"
             />
@@ -83,8 +76,8 @@ const logar = async (e) => {
             <input
               className="input"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
               placeholder="Digite sua senha"
               autoComplete="current-password"
             />
